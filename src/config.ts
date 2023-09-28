@@ -18,6 +18,7 @@ export const configSchema = z.object({
 
 export type Config = z.infer<typeof configSchema>
 
+export type CaseType = Config['modelCase'] & Config['dtoCase']
 export interface PrismaOptions {
   schemaPath: string
   outputPath: string

@@ -1,6 +1,27 @@
 import { DMMF } from '@prisma/generator-helper'
+import camelCase from 'lodash.camelcase'
+import startcase from 'lodash.startcase'
 import type { CodeBlockWriter } from 'ts-morph'
-import { Config } from './config'
+import { CaseType, Config } from './config'
+
+const pascalCase = (input: string) =>
+  startcase(camelCase(input)).replace(/ /g, '')
+
+const formatName = (
+  string: string,
+  caseType: CaseType,
+  suffix = '',
+  prefix = ''
+) => {
+  switch (caseType) {
+    case 'PascalCase':
+      return `${prefix}${pascalCase(string)}${suffix}`
+    case 'camelCase':
+      return `${prefix}${camelCase(string)}${suffix}`
+    default:
+      return `${prefix}${string}${suffix}`
+  }
+}
 
 export const writeArray = (
   writer: CodeBlockWriter,
@@ -15,33 +36,23 @@ export const useModelNames = ({
   dtoCase,
   relationModel,
 }: Config) => {
-  const formatModelName = (name: string, prefix = '') => {
-    let result = name
-    if (modelCase === 'camelCase') {
-      result = result.slice(0, 1).toLowerCase() + result.slice(1)
-    }
-    return `${prefix}${result}${modelSuffix}`
-  }
-
-  const formatDtoName = (name: string) => {
-    let result = name
-    if (dtoCase === 'camelCase') {
-      result = result.slice(0, 1).toLowerCase() + result.slice(1)
-    }
-    return `${result}${dtoSuffix}`
-  }
-
   return {
     modelName: (name: string) =>
-      formatModelName(name, relationModel === 'default' ? '_' : ''),
-    dtoName: (name: string) => formatDtoName(name),
+      formatName(
+        name,
+        modelCase,
+        modelSuffix,
+        relationModel === 'default' ? '_' : ''
+      ),
+    dtoName: (name: string) => formatName(name, dtoCase, dtoSuffix),
     relatedModelName: (
       name: string | DMMF.SchemaEnum | DMMF.OutputType | DMMF.SchemaArg
     ) =>
-      formatModelName(
+      formatName(
         relationModel === 'default'
           ? name.toString()
-          : `Related${name.toString()}`
+          : `Related${name.toString()}`,
+        modelCase
       ),
   }
 }

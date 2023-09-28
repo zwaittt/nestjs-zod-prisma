@@ -28,6 +28,7 @@
 		"bin",
 		"dist"
 	],
+	"packageManager": "yarn@1.22.17",
 	"scripts": {
 		"build": "dts build --target node --format cjs --rollupTypes",
 		"lint": "eslint --ext .ts,.tsx src",
@@ -40,10 +41,12 @@
 		"testEnvironment": "node"
 	},
 	"dependencies": {
-		"@prisma/generator-helper": "^4.3.1",
+		"@prisma/generator-helper": "5",
 		"parenthesis": "^3.1.8",
 		"ts-morph": "^13.0.2",
-		"zod": "^3.17.3"
+		"zod": "^3.17.3",
+		"lodash.camelcase": "^4.3.0",
+    "lodash.startcase": "^4.4.0"
 	},
 	"devDependencies": {
 		"@eslint-kit/eslint-config-base": "^5.0.2",
@@ -64,9 +67,11 @@
 		"jest-mock-extended": "^2.0.4",
 		"nestjs-zod": "^1.1.0",
 		"prettier": "2.3.0",
-		"prisma": "^4.3.1",
+		"prisma": "5",
 		"tslib": "^2.3.1",
-		"typescript": "^4.5.4"
+		"typescript": "^4.5.4",
+		"@types/lodash.camelcase": "^4.3.7",
+    "@types/lodash.startcase": "^4.4.7"
 	},
 	"peerDependencies": {
 		"decimal.js": "^10.0.0",
