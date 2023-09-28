@@ -7,15 +7,18 @@ import {
   generateBarrelFile,
   generateEnumsFile,
 } from './generator'
+import { formatName } from './util'
 
 const { version } = require('../package.json')
+
+const defaultOutputPath = './src/zod'
 
 generatorHandler({
   onManifest() {
     return {
       version,
       prettyName: 'NestJS Zod Schemas',
-      defaultOutput: './src/zod',
+      defaultOutput: defaultOutputPath,
     }
   },
   onGenerate(options) {
@@ -25,7 +28,7 @@ generatorHandler({
     const enums = options.dmmf.datamodel.enums
 
     const { schemaPath } = options
-    const outputPath = options.generator.output!.value
+    const outputPath = options.generator.output!.value!
     const clientPath = options.otherGenerators.find(
       (each) => each.provider.value === 'prisma-client-js'
     )!.output!.value!
@@ -59,7 +62,7 @@ generatorHandler({
 
     models.forEach((model) => {
       const sourceFile = project.createSourceFile(
-        `${outputPath}/${model.name.toLowerCase()}.ts`,
+        `${outputPath}/${formatName(model.name, config.modelCase)}.ts`,
         {},
         { overwrite: true }
       )

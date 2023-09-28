@@ -7,7 +7,7 @@ import { CaseType, Config } from './config'
 const pascalCase = (input: string) =>
   startcase(camelCase(input)).replace(/ /g, '')
 
-const formatName = (
+export const formatName = (
   string: string,
   caseType: CaseType,
   suffix = '',

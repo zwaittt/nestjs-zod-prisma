@@ -42,11 +42,11 @@
 	},
 	"dependencies": {
 		"@prisma/generator-helper": "5",
+		"lodash.camelcase": "^4.3.0",
+		"lodash.startcase": "^4.4.0",
 		"parenthesis": "^3.1.8",
 		"ts-morph": "^13.0.2",
-		"zod": "^3.17.3",
-		"lodash.camelcase": "^4.3.0",
-    "lodash.startcase": "^4.4.0"
+		"zod": "^3.17.3"
 	},
 	"devDependencies": {
 		"@eslint-kit/eslint-config-base": "^5.0.2",
@@ -54,10 +54,12 @@
 		"@eslint-kit/eslint-config-patch": "^1.0.0",
 		"@eslint-kit/eslint-config-prettier": "^5.0.0",
 		"@eslint-kit/eslint-config-typescript": "^5.2.0",
-		"@prisma/client": "^4.3.1",
+		"@prisma/client": "5",
 		"@prisma/sdk": "^4.0.0",
 		"@tsconfig/recommended": "^1.0.1",
 		"@types/fs-extra": "^9.0.13",
+		"@types/lodash.camelcase": "^4.3.7",
+		"@types/lodash.startcase": "^4.4.7",
 		"@typescript-eslint/parser": "^5.25.0",
 		"dts-cli": "^1.1.5",
 		"eslint": "7.32.0",
@@ -69,9 +71,7 @@
 		"prettier": "2.3.0",
 		"prisma": "5",
 		"tslib": "^2.3.1",
-		"typescript": "^4.5.4",
-		"@types/lodash.camelcase": "^4.3.7",
-    "@types/lodash.startcase": "^4.4.7"
+		"typescript": "^4.5.4"
 	},
 	"peerDependencies": {
 		"decimal.js": "^10.0.0",

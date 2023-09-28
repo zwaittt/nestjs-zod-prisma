@@ -23,6 +23,9 @@
   </a>
 </p>
 
+> fork of [nestjs-zod-prisma](https://github.com/risen228/nestjs-zod-prisma)
+> - fixed name of model, dto and output file
+
 ## Ecosystem
 
 | Package | About |
