@@ -1,6 +1,6 @@
 {
-	"name": "nestjs-zod-prisma",
-	"version": "0.0.0-set-by-ci",
+	"name": "@pixocial/nestjs-zod-prisma",
+	"version": "0.0.1",
 	"description": "A Prisma generator that creates Zod schemas for all of your models",
 	"license": "MIT",
 	"author": "Evgeny Zakharov",
@@ -28,7 +28,7 @@
 		"bin",
 		"dist"
 	],
-	"packageManager": "yarn@1.22.17",
+	"packageManager": "pnpm@8.2.0",
 	"scripts": {
 		"build": "dts build --target node --format cjs --rollupTypes",
 		"lint": "eslint --ext .ts,.tsx src",
@@ -49,25 +49,19 @@
 		"zod": "^3.17.3"
 	},
 	"devDependencies": {
-		"@eslint-kit/eslint-config-base": "^5.0.2",
-		"@eslint-kit/eslint-config-node": "^2.0.0",
-		"@eslint-kit/eslint-config-patch": "^1.0.0",
-		"@eslint-kit/eslint-config-prettier": "^5.0.0",
-		"@eslint-kit/eslint-config-typescript": "^5.2.0",
+		"@pixocial/eslint-config-vfe-ts": "^0.0.3",
 		"@prisma/client": "5",
 		"@prisma/sdk": "^4.0.0",
 		"@tsconfig/recommended": "^1.0.1",
 		"@types/fs-extra": "^9.0.13",
 		"@types/lodash.camelcase": "^4.3.7",
 		"@types/lodash.startcase": "^4.4.7",
-		"@typescript-eslint/parser": "^5.25.0",
 		"dts-cli": "^1.1.5",
-		"eslint": "7.32.0",
 		"execa": "^5.1.0",
 		"fast-glob": "^3.2.5",
 		"fs-extra": "^10.0.0",
 		"jest-mock-extended": "^2.0.4",
-		"nestjs-zod": "^1.1.0",
+		"nestjs-zod": "^3.0.0",
 		"prettier": "2.3.0",
 		"prisma": "5",
 		"tslib": "^2.3.1",
@@ -75,7 +69,7 @@
 	},
 	"peerDependencies": {
 		"decimal.js": "^10.0.0",
-		"nestjs-zod": "^1.1.0",
+		"nestjs-zod": "^3.0.0",
 		"prisma": ">=4.0.0"
 	},
 	"peerDependenciesMeta": {
