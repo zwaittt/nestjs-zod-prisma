@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const configBoolean = z
   .enum(['true', 'false'])
-  .transform((arg) => arg === 'true')
+  .transform(arg => arg === 'true')
 
 export const configSchema = z.object({
   relationModel: configBoolean.default('true').or(z.literal('default')),
@@ -20,12 +20,12 @@ export type Config = z.infer<typeof configSchema>
 
 export type CaseType = Config['modelCase'] & Config['dtoCase']
 export interface PrismaOptions {
-  schemaPath: string
-  outputPath: string
-  clientPath: string
+  schemaPath: string;
+  outputPath: string;
+  clientPath: string;
 }
 
 export interface Names {
-  model: string
-  related: string
+  model: string;
+  related: string;
 }

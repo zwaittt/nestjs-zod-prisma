@@ -1,12 +1,14 @@
-import path from 'path'
-import { DMMF } from '@prisma/generator-helper'
-import {
+import path from 'node:path'
+import type { DMMF } from '@prisma/generator-helper'
+import type {
   ImportDeclarationStructure,
   SourceFile,
+} from 'ts-morph'
+import {
   StructureKind,
   VariableDeclarationKind,
 } from 'ts-morph'
-import { Config, PrismaOptions } from './config'
+import type { Config, PrismaOptions } from './config'
 import { getJSDocs } from './docs'
 import { getZodConstructor } from './types'
 import { dotSlash, needsRelatedModel, useModelNames, writeArray } from './util'
@@ -15,7 +17,7 @@ export const writeImportsForModel = (
   model: DMMF.Model,
   sourceFile: SourceFile,
   config: Config,
-  { schemaPath, outputPath }: PrismaOptions
+  { schemaPath, outputPath }: PrismaOptions,
 ) => {
   const { relatedModelName } = useModelNames(config)
 
@@ -42,13 +44,13 @@ export const writeImportsForModel = (
       moduleSpecifier: dotSlash(
         path.relative(
           outputPath,
-          path.resolve(path.dirname(schemaPath), config.imports)
-        )
+          path.resolve(path.dirname(schemaPath), config.imports),
+        ),
       ),
     })
   }
 
-  if (config.useDecimalJs && model.fields.some((f) => f.type === 'Decimal')) {
+  if (config.useDecimalJs && model.fields.some(f => f.type === 'Decimal')) {
     importList.push({
       kind: StructureKind.ImportDeclaration,
       namedImports: ['Decimal'],
@@ -56,20 +58,20 @@ export const writeImportsForModel = (
     })
   }
 
-  const enumFields = model.fields.filter((f) => f.kind === 'enum')
-  const relationFields = model.fields.filter((f) => f.kind === 'object')
+  const enumFields = model.fields.filter(f => f.kind === 'enum')
+  const relationFields = model.fields.filter(f => f.kind === 'object')
 
   if (enumFields.length > 0) {
     importList.push({
       kind: StructureKind.ImportDeclaration,
       isTypeOnly: enumFields.length === 0,
       moduleSpecifier: dotSlash('enums'),
-      namedImports: enumFields.map((f) => f.type),
+      namedImports: enumFields.map(f => f.type),
     })
   }
 
   if (config.relationModel !== false && relationFields.length > 0) {
-    const filteredFields = relationFields.filter((f) => f.type !== model.name)
+    const filteredFields = relationFields.filter(f => f.type !== model.name)
 
     if (filteredFields.length > 0) {
       importList.push({
@@ -77,11 +79,11 @@ export const writeImportsForModel = (
         moduleSpecifier: './index',
         namedImports: Array.from(
           new Set(
-            filteredFields.flatMap((f) => [
+            filteredFields.flatMap(f => [
               `Complete${f.type}`,
               relatedModelName(f.type),
-            ])
-          )
+            ]),
+          ),
         ),
       })
     }
@@ -94,10 +96,10 @@ export const writeTypeSpecificSchemas = (
   model: DMMF.Model,
   sourceFile: SourceFile,
   config: Config,
-  _prismaOptions: PrismaOptions
+  _prismaOptions: PrismaOptions,
 ) => {
-  if (config.useDecimalJs && model.fields.some((f) => f.type === 'Decimal')) {
-    sourceFile.addStatements((writer) => {
+  if (config.useDecimalJs && model.fields.some(f => f.type === 'Decimal')) {
+    sourceFile.addStatements(writer => {
       writer.newLine()
       writeArray(writer, [
         '// Helper schema for Decimal fields',
@@ -122,14 +124,14 @@ export const generateSchemaForModel = (
   model: DMMF.Model,
   sourceFile: SourceFile,
   config: Config,
-  _prismaOptions: PrismaOptions
+  _prismaOptions: PrismaOptions,
 ) => {
   const { modelName } = useModelNames(config)
 
   sourceFile.addVariableStatement({
     declarationKind: VariableDeclarationKind.Const,
     isExported: true,
-    leadingTrivia: (writer) => writer.blankLineIfLastNot(),
+    leadingTrivia: writer => writer.blankLineIfLastNot(),
     declarations: [
       {
         name: modelName(model.name),
@@ -138,8 +140,8 @@ export const generateSchemaForModel = (
             .write('z.object(')
             .inlineBlock(() => {
               model.fields
-                .filter((f) => f.kind !== 'object')
-                .forEach((field) => {
+                .filter(f => f.kind !== 'object')
+                .forEach(field => {
                   writeArray(writer, getJSDocs(field.documentation))
                   writer
                     .write(`${field.name}: ${getZodConstructor(field)}`)
@@ -157,14 +159,14 @@ export const generateSchemaForModel = (
 export const generateDto = (
   model: DMMF.Model,
   sourceFile: SourceFile,
-  config: Config
+  config: Config,
 ) => {
   const { modelName, dtoName } = useModelNames(config)
 
   sourceFile.addClass({
     name: dtoName(model.name),
     isExported: true,
-    leadingTrivia: (writer) => writer.blankLineIfLastNot(),
+    leadingTrivia: writer => writer.blankLineIfLastNot(),
     extends: `createZodDto(${modelName(model.name)})`,
   })
 }
@@ -173,17 +175,17 @@ export const generateRelatedSchemaForModel = (
   model: DMMF.Model,
   sourceFile: SourceFile,
   config: Config,
-  _prismaOptions: PrismaOptions
+  _prismaOptions: PrismaOptions,
 ) => {
   const { modelName, relatedModelName } = useModelNames(config)
 
-  const relationFields = model.fields.filter((f) => f.kind === 'object')
+  const relationFields = model.fields.filter(f => f.kind === 'object')
 
   sourceFile.addInterface({
     name: `Complete${model.name}`,
     isExported: true,
     extends: [`z.infer<typeof ${modelName(model.name)}>`],
-    properties: relationFields.map((f) => ({
+    properties: relationFields.map(f => ({
       hasQuestionToken: !f.isRequired,
       name: f.name,
       type: `Complete${f.type}${f.isList ? '[]' : ''}${
@@ -192,17 +194,17 @@ export const generateRelatedSchemaForModel = (
     })),
   })
 
-  sourceFile.addStatements((writer) =>
+  sourceFile.addStatements(writer =>
     writeArray(writer, [
       '',
       '/**',
       ` * ${relatedModelName(
-        model.name
+        model.name,
       )} contains all relations on your model in addition to the scalars`,
       ' *',
       ' * NOTE: Lazy required in case of potential circular dependencies within schema',
       ' */',
-    ])
+    ]),
   )
 
   sourceFile.addVariableStatement({
@@ -216,15 +218,15 @@ export const generateRelatedSchemaForModel = (
           writer
             .write(`z.lazy(() => ${modelName(model.name)}.extend(`)
             .inlineBlock(() => {
-              relationFields.forEach((field) => {
+              relationFields.forEach(field => {
                 writeArray(writer, getJSDocs(field.documentation))
 
                 writer
                   .write(
                     `${field.name}: ${getZodConstructor(
                       field,
-                      relatedModelName
-                    )}`
+                      relatedModelName,
+                    )}`,
                   )
                   .write(',')
                   .newLine()
@@ -241,35 +243,35 @@ export const populateModelFile = (
   model: DMMF.Model,
   sourceFile: SourceFile,
   config: Config,
-  prismaOptions: PrismaOptions
+  prismaOptions: PrismaOptions,
 ) => {
   writeImportsForModel(model, sourceFile, config, prismaOptions)
   writeTypeSpecificSchemas(model, sourceFile, config, prismaOptions)
   generateSchemaForModel(model, sourceFile, config, prismaOptions)
-  if (config.generateDto) generateDto(model, sourceFile, config)
+  if (config.generateDto)
+    generateDto(model, sourceFile, config)
   if (needsRelatedModel(model, config))
     generateRelatedSchemaForModel(model, sourceFile, config, prismaOptions)
 }
 
 export const generateBarrelFile = (
   models: DMMF.Model[],
-  indexFile: SourceFile
+  indexFile: SourceFile,
+  formatter = (name: string) => name,
 ) => {
-  models.forEach((model) =>
+  models.forEach(model =>
     indexFile.addExportDeclaration({
-      moduleSpecifier: `./${model.name.toLowerCase()}`,
-    })
+      moduleSpecifier: `./${formatter(model.name.toLowerCase())}`,
+    }),
   )
 }
 
 export const generateEnumsFile = (
   enums: DMMF.DatamodelEnum[],
-  enumsFile: SourceFile
+  enumsFile: SourceFile,
 ) => {
   for (const { name, values } of enums) {
-    const members = values.map(({ name: memberName }) => {
-      return { name: memberName, value: memberName }
-    })
+    const members = values.map(({ name: memberName }) => ({ name: memberName, value: memberName }))
 
     enumsFile
       .addEnum({

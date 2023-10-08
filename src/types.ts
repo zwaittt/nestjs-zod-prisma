@@ -1,5 +1,5 @@
 import type { DMMF } from '@prisma/generator-helper'
-import { findCustomSchema, findSchemaAppends } from './docs'
+import { findCustomSchema, findPureComments, findSchemaAppends } from './docs'
 
 const mapScalarType: Record<string, string> = {
   String: 'z.string()',
@@ -16,15 +16,15 @@ const mapScalarType: Record<string, string> = {
 export const getZodConstructor = (
   field: DMMF.Field,
   getRelatedModelName = (
-    name: string | DMMF.SchemaEnum | DMMF.OutputType | DMMF.SchemaArg
-  ) => name.toString()
+    name: string | DMMF.SchemaEnum | DMMF.OutputType | DMMF.SchemaArg,
+  ) => name.toString(),
 ) => {
   let schema: string
 
   if (
-    field.kind === 'scalar' &&
-    typeof field.type === 'string' &&
-    Object.prototype.hasOwnProperty.call(mapScalarType, field.type)
+    field.kind === 'scalar'
+    && typeof field.type === 'string'
+    && Object.prototype.hasOwnProperty.call(mapScalarType, field.type)
   ) {
     schema = mapScalarType[field.type]
   } else if (field.kind === 'enum') {
@@ -41,6 +41,8 @@ export const getZodConstructor = (
     const custom = findCustomSchema(field.documentation)
     const appends = findSchemaAppends(field.documentation)
 
+    const comments = findPureComments(field.documentation)
+
     if (custom) {
       isCustom = true
       schema = custom
@@ -48,6 +50,10 @@ export const getZodConstructor = (
 
     for (const append of appends) {
       schema += append
+    }
+
+    if (comments) {
+      schema += `.describe('${comments}')`
     }
   }
 

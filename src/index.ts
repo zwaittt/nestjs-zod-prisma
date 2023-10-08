@@ -1,14 +1,15 @@
 import { generatorHandler } from '@prisma/generator-helper'
 import { Project } from 'ts-morph'
 import { SemicolonPreference } from 'typescript'
-import { configSchema, PrismaOptions } from './config'
+import type { PrismaOptions } from './config'
+import { configSchema } from './config'
 import {
-  populateModelFile,
   generateBarrelFile,
   generateEnumsFile,
+  populateModelFile,
 } from './generator'
-import { formatName } from './util'
-
+import { formatName, lintText } from './util'
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { version } = require('../package.json')
 
 const defaultOutputPath = './src/zod'
@@ -21,7 +22,7 @@ generatorHandler({
       defaultOutput: defaultOutputPath,
     }
   },
-  onGenerate(options) {
+  async onGenerate(options) {
     const project = new Project()
 
     const models = options.dmmf.datamodel.models
@@ -30,13 +31,13 @@ generatorHandler({
     const { schemaPath } = options
     const outputPath = options.generator.output!.value!
     const clientPath = options.otherGenerators.find(
-      (each) => each.provider.value === 'prisma-client-js'
+      each => each.provider.value === 'prisma-client-js',
     )!.output!.value!
 
     const results = configSchema.safeParse(options.generator.config)
     if (!results.success)
       throw new Error(
-        'Incorrect config provided. Please check the values you provided and try again.'
+        'Incorrect config provided. Please check the values you provided and try again.',
       )
 
     const config = results.data
@@ -49,10 +50,10 @@ generatorHandler({
     const indexFile = project.createSourceFile(
       `${outputPath}/index.ts`,
       {},
-      { overwrite: true }
+      { overwrite: true },
     )
 
-    generateBarrelFile(models, indexFile)
+    generateBarrelFile(models, indexFile, name => formatName(name, config.modelCase))
 
     indexFile.formatText({
       indentSize: 2,
@@ -60,36 +61,43 @@ generatorHandler({
       semicolons: SemicolonPreference.Remove,
     })
 
-    models.forEach((model) => {
+    const linted = await lintText(indexFile.getFullText(), `${outputPath}/index.ts`)
+
+    indexFile.replaceWithText(linted)
+
+    await models.map(model => {
+      const filePath = `${outputPath}/${formatName(model.name, config.modelCase)}.ts`
       const sourceFile = project.createSourceFile(
-        `${outputPath}/${formatName(model.name, config.modelCase)}.ts`,
+        filePath,
         {},
-        { overwrite: true }
+        { overwrite: true },
       )
 
       populateModelFile(model, sourceFile, config, prismaOptions)
 
-      sourceFile.formatText({
-        indentSize: 2,
-        convertTabsToSpaces: true,
-        semicolons: SemicolonPreference.Remove,
-      })
+      // sourceFile.formatText({
+      //   indentSize: 2,
+      //   convertTabsToSpaces: true,
+      //   semicolons: SemicolonPreference.Remove,
+      // })
+      return lintText(sourceFile.getFullText(), filePath).then(text => sourceFile.replaceWithText(text))
     })
 
     if (enums.length > 0) {
       const enumsFile = project.createSourceFile(
         `${outputPath}/enums.ts`,
         {},
-        { overwrite: true }
+        { overwrite: true },
       )
 
       generateEnumsFile(enums, enumsFile)
 
-      enumsFile.formatText({
-        indentSize: 2,
-        convertTabsToSpaces: true,
-        semicolons: SemicolonPreference.Remove,
-      })
+      // enumsFile.formatText({
+      //   indentSize: 2,
+      //   convertTabsToSpaces: true,
+      //   semicolons: SemicolonPreference.Remove,
+      // })
+      await lintText(enumsFile.getFullText(), `${outputPath}/enums.ts`).then(text => enumsFile.replaceWithText(text))
     }
 
     return project.save()

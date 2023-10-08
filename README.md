@@ -25,6 +25,8 @@
 
 > fork of [nestjs-zod-prisma](https://github.com/risen228/nestjs-zod-prisma)
 > - fixed name of model, dto and output file
+> - 根据 schema 的注释增加 zod 字段的 `describe`
+> - lint 输出文件
 
 ## Ecosystem
 

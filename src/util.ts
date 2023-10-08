@@ -1,8 +1,9 @@
-import { DMMF } from '@prisma/generator-helper'
+import type { DMMF } from '@prisma/generator-helper'
 import camelCase from 'lodash.camelcase'
 import startcase from 'lodash.startcase'
 import type { CodeBlockWriter } from 'ts-morph'
-import { CaseType, Config } from './config'
+import { ESLint } from 'eslint'
+import type { CaseType, Config } from './config'
 
 const pascalCase = (input: string) =>
   startcase(camelCase(input)).replace(/ /g, '')
@@ -11,7 +12,7 @@ export const formatName = (
   string: string,
   caseType: CaseType,
   suffix = '',
-  prefix = ''
+  prefix = '',
 ) => {
   switch (caseType) {
     case 'PascalCase':
@@ -26,8 +27,8 @@ export const formatName = (
 export const writeArray = (
   writer: CodeBlockWriter,
   array: string[],
-  newLine = true
-) => array.forEach((line) => writer.write(line).conditionalNewLine(newLine))
+  newLine = true,
+) => array.forEach(line => writer.write(line).conditionalNewLine(newLine))
 
 export const useModelNames = ({
   modelCase,
@@ -35,40 +36,34 @@ export const useModelNames = ({
   dtoSuffix,
   dtoCase,
   relationModel,
-}: Config) => {
-  return {
-    modelName: (name: string) =>
-      formatName(
-        name,
-        modelCase,
-        modelSuffix,
-        relationModel === 'default' ? '_' : ''
-      ),
-    dtoName: (name: string) => formatName(name, dtoCase, dtoSuffix),
-    relatedModelName: (
-      name: string | DMMF.SchemaEnum | DMMF.OutputType | DMMF.SchemaArg
-    ) =>
-      formatName(
-        relationModel === 'default'
-          ? name.toString()
-          : `Related${name.toString()}`,
-        modelCase
-      ),
-  }
-}
+}: Config) => ({
+  modelName: (name: string) =>
+    formatName(
+      name,
+      modelCase,
+      modelSuffix,
+      relationModel === 'default' ? '_' : '',
+    ),
+  dtoName: (name: string) => formatName(name, dtoCase, dtoSuffix),
+  relatedModelName: (
+    name: string | DMMF.SchemaEnum | DMMF.OutputType | DMMF.SchemaArg,
+  ) =>
+    formatName(
+      relationModel === 'default'
+        ? name.toString()
+        : `Related${name.toString()}`,
+      modelCase,
+    ),
+})
 
 export const needsRelatedModel = (model: DMMF.Model, config: Config) =>
-  model.fields.some((field) => field.kind === 'object') &&
-  config.relationModel !== false
+  model.fields.some(field => field.kind === 'object')
+  && config.relationModel !== false
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const chunk = <T extends any[]>(input: T, size: number): T[] => {
-  return input.reduce((array, item, idx) => {
-    return idx % size === 0
-      ? [...array, [item]]
-      : [...array.slice(0, -1), [...array.slice(-1)[0], item]]
-  }, [])
-}
+ 
+export const chunk = <T extends any[]>(input: T, size: number): T[] => input.reduce((array, item, idx) => idx % size === 0
+  ? [...array, [item]]
+  : [...array.slice(0, -1), [...array.slice(-1)[0], item]], [])
 
 export const dotSlash = (input: string) => {
   const converted = input
@@ -76,10 +71,25 @@ export const dotSlash = (input: string) => {
     .replace(/\\/g, '/')
     .replace(/\/\/+/g, '/')
 
-  if (converted.includes(`/node_modules/`))
-    return converted.split(`/node_modules/`).slice(-1)[0]
+  if (converted.includes('/node_modules/'))
+    return converted.split('/node_modules/').slice(-1)[0]
 
-  if (converted.startsWith(`../`)) return converted
+  if (converted.startsWith('../'))
+    return converted
 
-  return './' + converted
+  return `./${converted}`
+}
+
+let eslint: ESLint
+
+export async function lintText(text: string, path?: string) {
+  eslint = eslint || new ESLint({
+    cwd: process.cwd(),
+    fix: true,
+    ignore: true,
+  })
+  const res = await eslint.lintText(text, {
+    filePath: path,
+  })
+  return res[0].output || text
 }

@@ -9,9 +9,7 @@ const SLICE_OFFSETS: Record<Directive, number> = {
 }
 
 function hasDirectives(line: string, directives = Object.values(Directive)) {
-  return directives.some((directive) => {
-    return line.trim().startsWith(directive)
-  })
+  return directives.some(directive => line.trim().startsWith(directive))
 }
 
 function hasNoDirectives(line: string, directives?: Directive[]) {
@@ -20,7 +18,8 @@ function hasNoDirectives(line: string, directives?: Directive[]) {
 
 function extractDirectiveValue(lines: string[], directive: Directive) {
   for (const line of lines) {
-    if (hasNoDirectives(line, [directive])) continue
+    if (hasNoDirectives(line, [directive]))
+      continue
     return line.trim().slice(SLICE_OFFSETS[directive])
   }
 
@@ -33,11 +32,11 @@ export const getJSDocs = (docString?: string) => {
   if (docString) {
     const docLines = docString
       .split('\n')
-      .filter((line) => hasNoDirectives(line))
+      .filter(line => hasNoDirectives(line))
 
     if (docLines.length > 0) {
       lines.push('/**')
-      docLines.forEach((line) => lines.push(` * ${line}`))
+      docLines.forEach(line => lines.push(` * ${line}`))
       lines.push(' */')
     }
   }
@@ -55,8 +54,14 @@ export function findSchemaAppends(documentation: string): string[] {
 
   for (const line of documentation.split('\n')) {
     const append = extractDirectiveValue([line], Directive.Append)
-    if (append) appends.push(append)
+    if (append)
+      appends.push(append)
   }
 
   return appends
+}
+
+export function findPureComments(documentation: string): string {
+  const lines = documentation.split('\n')
+  return lines.filter(line => hasNoDirectives(line)).map(line => line.trim()).join(';')
 }
