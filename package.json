@@ -1,6 +1,6 @@
 {
 	"name": "@pixocial/nestjs-zod-prisma",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "A Prisma generator that creates Zod schemas for all of your models",
 	"license": "MIT",
 	"author": "Evgeny Zakharov",
@@ -45,7 +45,6 @@
 	},
 	"dependencies": {
 		"@prisma/generator-helper": "5",
-		"eslint": ">=8",
 		"lodash.camelcase": "^4.3.0",
 		"lodash.startcase": "^4.4.0",
 		"parenthesis": "^3.1.8",
@@ -62,6 +61,7 @@
 		"@types/lodash.camelcase": "^4.3.7",
 		"@types/lodash.startcase": "^4.4.7",
 		"dts-cli": "^1.1.5",
+		"eslint": "^8.51.0",
 		"execa": "^5.1.0",
 		"fast-glob": "^3.2.5",
 		"fs-extra": "^10.0.0",
@@ -74,11 +74,16 @@
 	},
 	"peerDependencies": {
 		"decimal.js": "^10.0.0",
+		"eslint": ">=8",
 		"nestjs-zod": "^3.0.0",
-		"prisma": ">=4.0.0"
+		"prisma": ">=4.0.0",
+		"typescript": ">=4.5.4"
 	},
 	"peerDependenciesMeta": {
 		"decimal.js": {
+			"optional": true
+		},
+		"eslint": {
 			"optional": true
 		}
 	},

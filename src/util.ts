@@ -2,7 +2,7 @@ import type { DMMF } from '@prisma/generator-helper'
 import camelCase from 'lodash.camelcase'
 import startcase from 'lodash.startcase'
 import type { CodeBlockWriter } from 'ts-morph'
-import { ESLint } from 'eslint'
+import type { ESLint } from 'eslint'
 import type { CaseType, Config } from './config'
 
 const pascalCase = (input: string) =>
@@ -80,16 +80,31 @@ export const dotSlash = (input: string) => {
   return `./${converted}`
 }
 
-let eslint: ESLint
+let eslint: ESLint | null
 
 export async function lintText(text: string, path?: string) {
-  eslint = eslint || new ESLint({
-    cwd: process.cwd(),
-    fix: true,
-    ignore: true,
-  })
+  if (eslint === undefined) {
+    try {
+      const { ESLint } = await import('eslint')
+      eslint = new ESLint({
+        cwd: process.cwd(),
+        fix: true,
+        ignore: true,
+        baseConfig: {
+        },
+      })
+      await eslint.calculateConfigForFile(path || `${process.cwd()}/index.ts`)
+    } catch (e) {
+      // eslint not installed or configuration error indicated in the current project.
+      eslint = null
+      return text
+    }
+  }
+  if (eslint === null) {
+    return text
+  }
   const res = await eslint.lintText(text, {
     filePath: path,
   })
-  return res[0].output || text
+  return res[0].output as string || text
 }

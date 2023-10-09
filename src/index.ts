@@ -75,11 +75,11 @@ generatorHandler({
 
       populateModelFile(model, sourceFile, config, prismaOptions)
 
-      // sourceFile.formatText({
-      //   indentSize: 2,
-      //   convertTabsToSpaces: true,
-      //   semicolons: SemicolonPreference.Remove,
-      // })
+      sourceFile.formatText({
+        indentSize: 2,
+        convertTabsToSpaces: true,
+        semicolons: SemicolonPreference.Remove,
+      })
       return lintText(sourceFile.getFullText(), filePath).then(text => sourceFile.replaceWithText(text))
     })
 
@@ -92,11 +92,11 @@ generatorHandler({
 
       generateEnumsFile(enums, enumsFile)
 
-      // enumsFile.formatText({
-      //   indentSize: 2,
-      //   convertTabsToSpaces: true,
-      //   semicolons: SemicolonPreference.Remove,
-      // })
+      enumsFile.formatText({
+        indentSize: 2,
+        convertTabsToSpaces: true,
+        semicolons: SemicolonPreference.Remove,
+      })
       await lintText(enumsFile.getFullText(), `${outputPath}/enums.ts`).then(text => enumsFile.replaceWithText(text))
     }
 
