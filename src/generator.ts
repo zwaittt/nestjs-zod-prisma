@@ -11,7 +11,7 @@ import {
 import type { Config, PrismaOptions } from './config'
 import { getJSDocs } from './docs'
 import { getZodConstructor } from './types'
-import { dotSlash, needsRelatedModel, useModelNames, writeArray } from './util'
+import { dotSlash, formatName, needsRelatedModel, useModelNames, writeArray } from './util'
 
 export const writeImportsForModel = (
   model: DMMF.Model,
@@ -80,7 +80,7 @@ export const writeImportsForModel = (
         namedImports: Array.from(
           new Set(
             filteredFields.flatMap(f => [
-              `Complete${f.type}`,
+              `Complete${formatName(f.type, config.modelCase)}`,
               relatedModelName(f.type),
             ]),
           ),
@@ -182,13 +182,13 @@ export const generateRelatedSchemaForModel = (
   const relationFields = model.fields.filter(f => f.kind === 'object')
 
   sourceFile.addInterface({
-    name: `Complete${model.name}`,
+    name: `Complete${formatName(model.name, config.modelCase)}`,
     isExported: true,
     extends: [`z.infer<typeof ${modelName(model.name)}>`],
     properties: relationFields.map(f => ({
       hasQuestionToken: !f.isRequired,
       name: f.name,
-      type: `Complete${f.type}${f.isList ? '[]' : ''}${
+      type: `Complete${formatName(f.type, config.modelCase)}${f.isList ? '[]' : ''}${
         !f.isRequired ? ' | null' : ''
       }`,
     })),
@@ -213,7 +213,7 @@ export const generateRelatedSchemaForModel = (
     declarations: [
       {
         name: relatedModelName(model.name),
-        type: `z.ZodSchema<Complete${model.name}>`,
+        type: `z.ZodSchema<Complete${formatName(model.name, config.modelCase)}>`,
         initializer(writer) {
           writer
             .write(`z.lazy(() => ${modelName(model.name)}.extend(`)
@@ -261,7 +261,7 @@ export const generateBarrelFile = (
 ) => {
   models.forEach(model =>
     indexFile.addExportDeclaration({
-      moduleSpecifier: `./${formatter(model.name.toLowerCase())}`,
+      moduleSpecifier: `./${formatter(model.name)}`,
     }),
   )
 }

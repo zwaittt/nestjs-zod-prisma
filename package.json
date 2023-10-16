@@ -1,6 +1,6 @@
 {
 	"name": "@pixocial/nestjs-zod-prisma",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "A Prisma generator that creates Zod schemas for all of your models",
 	"license": "MIT",
 	"author": "Evgeny Zakharov",
