@@ -9,6 +9,7 @@ import {
   populateModelFile,
 } from './generator'
 import { formatName, lintText } from './util'
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { version } = require('../package.json')
 
